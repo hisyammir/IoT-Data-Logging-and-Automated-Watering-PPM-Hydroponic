@@ -104,26 +104,19 @@ void setup() {
               break;
             }
         }
-//          Serial.println("reply was:");
-//          Serial.println("==========");
-//          Serial.println(minppmstring);
-//          Serial.println("==========");  
+
           float minppm = minppmstring.toFloat();
-          Serial.println("Min PPM");    
+          Serial.println("Min PPM : ");    
            Serial.println(minppm);     
 }
   
 void loop() {
-//  temperature = 27;
-//  temperature = dht.readTemperature();
-  // Read temperature as Celsius (the default
-  
+  //Pembacaan TDS Sensor di Bak Penampungan Nutrisi
   //memilih y0 sebagai input
   digitalWrite(s0,LOW);
   digitalWrite(s1,LOW);
   digitalWrite(s2,LOW);
-//  nilaiInput = analogRead(analogPin);
-//   pinMode(analogPin,INPUT);
+
   if(millis()-analogSampleTimepoint>40)     //read the analog value from the ADC
  {
    analogSampleTimepoint=millis();
@@ -133,20 +126,7 @@ void loop() {
  }   
 
  if(millis()-printTimepoint>1000)
- {
-//    WiFiClient client = server.available();
-// 
-//    HTTPClient http;
-//    String urlminppm = get_host+"/node_waterpgsql/get_pengaliran.php";
-//        
-//        http.begin(urlminppm);
-//       
-//        //GET method
-//        int httpCode = http.GET();
-//        String payload = http.getString();
-//        Serial.println(httpCode);
-//        http.end();
-      
+ {  
     printTimepoint=millis();
 //    temperature = dht.readTemperature();
     for(copyIndex=0;copyIndex<SCOUNT;copyIndex++) analogBufferTemp[copyIndex]=analogBuffer[copyIndex];
@@ -158,39 +138,20 @@ void loop() {
     Serial.print("TDS Value1:");
     Serial.print(tdsValue,0);
     Serial.println("ppm");
+    //Control Solenoid
       if (tdsValue > minppm){
     digitalWrite(relay, solenoidNyala);
     Serial.print("Buka – dibawah min ppm \n");
-//    Serial.println("Lampu Nyala");
     }else {
     digitalWrite(relay, solenoidMati);
     Serial.print("tutup – diatas min ppm \n");
-//    Serial.println("Lampu Mati");
       };
-    
-// 
-//  // Read all the lines of the reply from server and print them to Serial
-//  while (client.available()) {
-//    String line = client.readStringUntil('\r');
-//    //Serial.print(line);
-// 
-//    if (line.indexOf("sukses gaes") != -1) {
-//      Serial.println();
-//      Serial.println("Yes, data masuk");
-//    } else if (line.indexOf("gagal gaes") != -1) {
-//      Serial.println();
-//      Serial.println("Maaf, data gagal masuk");
-//      //digitalWrite(alarmPin, HIGH);
-//    }
-//  }
-// 
-//  Serial.println();
-//  Serial.println("closing connection");
-     
-  }
- 
+    //END Control Solenoid  
+  } 
 //     Serial.print(" ");
-//  memilih y1 sebagai input
+
+  //Pembacaan TDS Sensor di Pipa Akhir Pengaliran Nutrisi
+  //  memilih y1 sebagai input
   digitalWrite(s0,HIGH);
   digitalWrite(s1,LOW);
   digitalWrite(s2,LOW);
@@ -205,13 +166,6 @@ void loop() {
  if(millis()-printTimepoint2>1000)
  {
     printTimepoint2=millis();
-//    temperature = dht.readTemperature();
-
-//        client.print(String("GET ") + "/node_waterpgsql/get_pengaliran.php/" + " HTTP/1.1\r\n" +
-//            "Host: " + host + "\r\n" +
-//             "Connection: close\r\n\r\n");
-
-//        Serial.println(payload);
     for(copyIndex2=0;copyIndex2<SCOUNT;copyIndex2++) analogBufferTemp2[copyIndex2]=analogBuffer2[copyIndex2];
     averageVoltage2=getMedianNum(analogBufferTemp2,SCOUNT)*(float)VREF/1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
     float compensationCoefficient2=1.0+0.02*(temperature-25.0);    //temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
@@ -221,8 +175,8 @@ void loop() {
     Serial.print("TDS Value2:");
     Serial.print(tdsValue2,0);
     Serial.println("ppm");
-
-    if(millis()-sendTimepoint>360000)
+  
+    if(millis()-sendTimepoint>360000)//POST Data PPM ke server
     {
         sendTimepoint=millis();    
         Serial.print("connecting to ");
@@ -233,34 +187,22 @@ void loop() {
           Serial.println("connection failed");
           return;
         }
-//        client.print(String("GET ") + "/node_waterpgsql/get_pengaliran.php?status=1" + " HTTP/1.1\r\n" +
-//                   "Host: " + host + "\r\n" +
-//                   "Connection: close\r\n\r\n");
-
-//        String payload = client.readString();
-//        char ch = static_cast<char>(client.read());
-//        Serial.print(ch);
-//        Serial.println(payload);
-//        Serial.flush();
-        
-   
        // We now create a URI for the request
       String url = "/node_waterpgsql/add.php?";
-//      url += "id_pengaliran=";
-//      url += id_pengaliran;
+
       url += "ppm=";
       url += tdsValue;
       url += "&ppm2=";
       url += tdsValue2;
-    // 
+  
       Serial.print("Requesting URL: ");
       Serial.println(url);
-    // 
+  
     //  // This will send the request to the server
       client.print(String("GET ") + url + " HTTP/1.1\r\n" +
                    "Host: " + host + "\r\n" +
                    "Connection: close\r\n\r\n");
-    // 
+  
       unsigned long timeout = millis();
       while (client.available() == 0) {
         if (millis() - timeout > 420000) {
@@ -269,7 +211,7 @@ void loop() {
           return;
         }
      }
-    }
+    } //END of POST DATA PPM KE SERVER
  }
 }
 
