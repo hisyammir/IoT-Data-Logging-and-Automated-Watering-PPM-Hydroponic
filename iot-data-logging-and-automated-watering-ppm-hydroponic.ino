@@ -176,7 +176,7 @@ void loop() {
     Serial.print(tdsValue2,0);
     Serial.println("ppm");
   
-    if(millis()-sendTimepoint>5000)//POST Data PPM ke server
+    if(millis()-sendTimepoint>360000)//POST Data PPM ke server
     {
         sendTimepoint=millis();    
         Serial.print("connecting to ");
