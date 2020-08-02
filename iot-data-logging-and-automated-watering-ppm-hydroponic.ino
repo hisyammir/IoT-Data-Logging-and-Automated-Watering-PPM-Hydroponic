@@ -92,7 +92,7 @@ void setup() {
           Serial.println("connection failed");
           return;
         }
-            client.print(String("GET ") + "/node_waterpgsql/get_pengaliran.php" + " HTTP/1.1\r\n" +
+            client.print(String("GET ") + "/todatabasepgsql/get_pengaliran.php" + " HTTP/1.1\r\n" +
                    "Host: " + host + "\r\n" +
                    "Connection: close\r\n\r\n");
         String minppmstring;
@@ -188,7 +188,7 @@ void loop() {
           return;
         }
        // We now create a URI for the request
-      String url = "/node_waterpgsql/add.php?";
+      String url = "/todatabasepgsql/add.php?";
 
       url += "ppm=";
       url += tdsValue;
