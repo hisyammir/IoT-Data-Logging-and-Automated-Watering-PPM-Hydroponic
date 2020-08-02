@@ -139,7 +139,7 @@ void loop() {
     Serial.print(tdsValue,0);
     Serial.println("ppm");
     //Control Solenoid
-      if (tdsValue > minppm){
+      if (tdsValue < minppm){
     digitalWrite(relay, solenoidNyala);
     Serial.print("Buka – dibawah min ppm \n");
     }else {
