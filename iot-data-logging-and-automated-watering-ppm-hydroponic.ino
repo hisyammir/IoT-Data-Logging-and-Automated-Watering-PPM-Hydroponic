@@ -92,7 +92,7 @@ void setup() {
           Serial.println("connection failed");
           return;
         }
-            client.print(String("GET ") + "/todatabasepgsql/get_pengaliran.php" + " HTTP/1.1\r\n" +
+            client.print(String("GET ") + "/script-to-database-pgsql/get_pengaliran.php" + " HTTP/1.1\r\n" +
                    "Host: " + host + "\r\n" +
                    "Connection: close\r\n\r\n");
         String minppmstring;
@@ -139,7 +139,7 @@ void loop() {
     Serial.print(tdsValue,0);
     Serial.println("ppm");
     //Control Solenoid
-      if (tdsValue < minppm){
+      if (tdsValue > minppm){
     digitalWrite(relay, solenoidNyala);
     Serial.print("Buka – dibawah min ppm \n");
     }else {
@@ -176,7 +176,7 @@ void loop() {
     Serial.print(tdsValue2,0);
     Serial.println("ppm");
   
-    if(millis()-sendTimepoint>360000)//POST Data PPM ke server
+    if(millis()-sendTimepoint>5000)//POST Data PPM ke server
     {
         sendTimepoint=millis();    
         Serial.print("connecting to ");
@@ -188,7 +188,7 @@ void loop() {
           return;
         }
        // We now create a URI for the request
-      String url = "/todatabasepgsql/add.php?";
+      String url = "/script-to-database-pgsql/add.php?";
 
       url += "ppm=";
       url += tdsValue;
