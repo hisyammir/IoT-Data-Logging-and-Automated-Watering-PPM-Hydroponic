@@ -26,13 +26,13 @@ float minppm;
 int solenoidNyala = LOW;
 int solenoidMati = HIGH;
 
- int analogBuffer[SCOUNT];    // store the analog value in the array, read from ADC
+int analogBuffer[SCOUNT];    // store the analog value in the array, read from ADC
 int analogBufferTemp[SCOUNT];
 int analogBufferIndex = 0,copyIndex = 0;
 float averageVoltage = 0,tdsValue = 0, temperature = 27;
 unsigned long int analogSampleTimepoint,printTimepoint;
 
- int analogBuffer2[SCOUNT];    // store the analog value in the array, read from ADC
+int analogBuffer2[SCOUNT];    // store the analog value in the array, read from ADC
 int analogBufferTemp2[SCOUNT];
 int analogBufferIndex2 = 0,copyIndex2 = 0;
 float averageVoltage2 = 0,tdsValue2 = 0;
@@ -44,8 +44,8 @@ unsigned long int analogSampleTimepoint2,printTimepoint2, sendTimepoint;
 //variabel untuk menyimpan nilai input
 int nilaiInput = 0;
 
-const char* ssid     = "uhuy"; //nama wifi
-const char* password = "wifikere"; //password
+const char* ssid     = "IoTHidroponik"; //nama wifi
+const char* password = "iotforfun"; //password
 const char* host = "192.168.43.35"; //IP PC
 String get_host = "192.168.43.35";
 
@@ -61,7 +61,7 @@ void setup() {
   pinMode(s2, OUTPUT);
   
   //aktifkan komunikasi serial
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(relay, OUTPUT);
   digitalWrite(relay, solenoidMati);
 
@@ -125,10 +125,31 @@ void loop() {
    if(analogBufferIndex==SCOUNT) analogBufferIndex=0;
  }   
 
- if(millis()-printTimepoint>1000)
+// if(millis()-printTimepoint>1000)
+// {  
+//    printTimepoint=millis();
+////    temperature = dht.readTemperature();
+//    
+//    //END Control Solenoid  
+//  } 
+//     Serial.print(" ");
+
+  //Pembacaan TDS Sensor di Pipa Akhir Pengaliran Nutrisi
+  //  memilih y1 sebagai input
+  digitalWrite(s0,LOW);
+  digitalWrite(s1,HIGH);
+  digitalWrite(s2,LOW);
+  if(millis()-analogSampleTimepoint2>40)     //read the analog value from the ADC
+ {
+   analogSampleTimepoint2=millis();
+   analogBuffer2[analogBufferIndex2]=analogRead(analogPin);    //read the analog value and store into the buffer
+   analogBufferIndex2++;
+   if(analogBufferIndex2==SCOUNT) analogBufferIndex2=0;
+ }   
+
+ if(millis()-printTimepoint2>1000)
  {  
-    printTimepoint=millis();
-//    temperature = dht.readTemperature();
+    printTimepoint2=millis();
     for(copyIndex=0;copyIndex<SCOUNT;copyIndex++) analogBufferTemp[copyIndex]=analogBuffer[copyIndex];
     averageVoltage=getMedianNum(analogBufferTemp,SCOUNT)*(float)VREF/1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
     float compensationCoefficient=1.0+0.02*(temperature-25.0);    //temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
@@ -146,30 +167,11 @@ void loop() {
     digitalWrite(relay, solenoidMati);
     Serial.print("tutup – diatas min ppm \n");
       };
-    //END Control Solenoid  
-  } 
-//     Serial.print(" ");
-
-  //Pembacaan TDS Sensor di Pipa Akhir Pengaliran Nutrisi
-  //  memilih y1 sebagai input
-  digitalWrite(s0,HIGH);
-  digitalWrite(s1,LOW);
-  digitalWrite(s2,LOW);
-  if(millis()-analogSampleTimepoint2>40)     //read the analog value from the ADC
- {
-   analogSampleTimepoint2=millis();
-   analogBuffer2[analogBufferIndex2]=analogRead(analogPin);    //read the analog value and store into the buffer
-   analogBufferIndex2++;
-   if(analogBufferIndex2==SCOUNT) analogBufferIndex2=0;
- }   
-
- if(millis()-printTimepoint2>1000)
- {
-    printTimepoint2=millis();
+    
     for(copyIndex2=0;copyIndex2<SCOUNT;copyIndex2++) analogBufferTemp2[copyIndex2]=analogBuffer2[copyIndex2];
     averageVoltage2=getMedianNum(analogBufferTemp2,SCOUNT)*(float)VREF/1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
-    float compensationCoefficient2=1.0+0.02*(temperature-25.0);    //temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
-    float compensationVolatge2=averageVoltage2/compensationCoefficient2;  //temperature compensation
+    compensationCoefficient=1.0+0.02*(temperature-25.0);    //temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
+    float compensationVolatge2=averageVoltage2/compensationCoefficient;  //temperature compensation
     tdsValue2=(133.42*compensationVolatge2*compensationVolatge2*compensationVolatge2-255.86*compensationVolatge2*compensationVolatge2+857.39*compensationVolatge2)*0.5; //convert voltage value to tds value
     
     Serial.print("TDS Value2:");
